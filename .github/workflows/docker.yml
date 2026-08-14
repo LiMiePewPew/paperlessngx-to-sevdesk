@@ -2,15 +2,19 @@ name: Publish Docker image
 
 on:
   push:
-    branches:
-      - main
     tags:
       - '*'
+  workflow_dispatch:
+
+concurrency:
+  group: docker-publish-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   push_to_registry:
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -27,7 +31,6 @@ jobs:
         with:
           images: lippertsweb/paperlessngx-to-sevdesk
           tags: |
-            # set latest tag for default branch
             type=raw,value=latest,enable={{is_default_branch}}
             type=semver,pattern={{version}}
 
